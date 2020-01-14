@@ -1,3 +1,4 @@
+from pathlib import Path
 from matplotlib import pyplot as plt
 import seaborn as sns
 from rockpool import load_ts_from_file
@@ -24,7 +25,7 @@ def plot_examples():
     )
 
     for i_anom, (ax, lbl) in enumerate(zip(axes.flatten(), labels)):
-        ts_anom = load_ts_from_file(f"{i_anom}.npz")
+        ts_anom = load_ts_from_file(Path("example_beats") / f"{i_anom}.npz")
         ts_anom.plot(target=ax)
         ax.set_title(lbl)
         ax.set_xlabel("Time [s]")

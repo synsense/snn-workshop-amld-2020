@@ -1,9 +1,4 @@
-from typing import Union
-from pathlib import Path
-from pprint import pprint
-import os
 import numpy as np
-import pandas as pd
 from rockpool import TSContinuous
 from ECG import recordings
 
@@ -14,17 +9,14 @@ DT = 0.002_778
 omit_recordings = [100, 102, 103, 104, 114, 117, 123, 124]
 use_targets = [0, 1, 2, 3, 4, 5]
 params_signal = {
-    # "load_path": signal_path,
-    "p_normal": 0.75,  # Probability of normal input rhythm (ignore if not uniform class probs)
     "include": {"target": use_targets},  # - Which target classes to use
     "exclude": {"is_used": True, "recording": omit_recordings},
-    "min_len_segment": 5,  # Minimum number of beats in continuous anomaly segment
-    "max_len_segment": 10,  # Maximum number of beats in continuous anomaly segment
-    "continuous_segments": True,  # If `True`, segments consist of contiguous heart beats
+    "min_len_segment": 5,
+    "max_len_segment": 10,
+    "continuous_segments": True,
     "min_anomal_per_seg": 3,
-    "batchsize": 500,  # Number trials per test or validation batch
-    "same_tgt_segments": False,  # Every beat in a segment is of same class
-    "same_rec_segments": False,  # Segments are also of same recording (not only same class) - only relevant if use_cont_segments is False
+    "target_probs": {1: 0.05, 2: 0.05, 3: 0.05, 4: 0.05, 5: 0.05, 0: 0.75},
+    "match_segments": set(),
 }
 
 
@@ -33,12 +25,8 @@ class ECGDataLoader:
         self.ecg_recordings = recordings.ECGRecordings()
         self.params = params_signal
 
-        # - dict that maps classes from recordings to those used in plot
-        try:
-            target_classes = set(params_signal.pop("target_classes"))
-        except KeyError:
-            # - Infer target classes from probabilities
-            target_classes = set(params_signal["target_probs"].keys())
+        # - Infer target classes from probabilities
+        target_classes = set(params_signal["target_probs"].keys())
 
         self.remap_targets = {k: v for v, k in enumerate(sorted(target_classes))}
         self.target_idcs = {
@@ -85,11 +73,23 @@ class ECGDataLoader:
                 timestep_start=timestep_start,
                 is_first=is_first,
                 is_last=i_batch == num_batches - 1,
-                min_anomal_per_seg=self.params_signal["min_anomal_per_seg"],
             )
             timestep_start += batch.num_timesteps
             is_first = False
             yield batch
+
+    def get_single_batch(self, num_beats: int):
+
+        # - Get data
+        annotations, signal = self.ecg_recordings.provide_data(num_beats, **self.params)
+        return self._create_batch(
+            signal=signal,
+            annotations=annotations,
+            i_batch=0,
+            timestep_start=0,
+            is_first=True,
+            is_last=True,
+        )
 
     def _get_target(self, ann_batch):
         return self.ecg_recordings.generate_target(
@@ -97,14 +97,7 @@ class ECGDataLoader:
         )
 
     def _create_batch(
-        self,
-        signal,
-        annotations,
-        i_batch,
-        timestep_start,
-        is_first,
-        is_last,
-        min_anomal_per_seg,
+        self, signal, annotations, i_batch, timestep_start, is_first, is_last
     ):
         target_batch = self._get_target(annotations)
 
@@ -117,8 +110,6 @@ class ECGDataLoader:
             is_first=is_first,
             is_last=is_last,
             dt=DT,
-            min_anomal_per_seg=min_anomal_per_seg,
-            target_idcs=self.target_idcs,
             target_names=self.target_names,
         )
 
@@ -138,25 +129,19 @@ class ECGBatch:
         is_first,
         is_last,
         dt,
-        min_anomal_per_seg,
-        target_idcs,
         target_names,
     ):
-        self.str_id = "{:03d}".format(n_id)
         self.annotations = annotations
         self.dt = dt
         self.is_first = is_first
         self.is_last = is_last
-        self.min_anomal_per_seg = min_anomal_per_seg
-        self.target_idcs = target_idcs
         self.target_names = target_names
         self._generate_timeseries(inp_data, tgt_data, timestep_start)
 
     def _generate_timeseries(self, inp_data, tgt_data, timestep_start):
-        num_timesteps = inp_data.shape[0]
-        self.times = (np.arange(num_timesteps) + timestep_start) * self.dt
-        t_stop = (timestep_start + num_timesteps) * self.dt
+        self.num_timesteps = inp_data.shape[0]
+        self.times = (np.arange(self.num_timesteps) + timestep_start) * self.dt
+        t_stop = (timestep_start + self.num_timesteps) * self.dt
         self.input = TSContinuous(self.times, inp_data, t_stop=t_stop)
         self.target = TSContinuous(self.times, tgt_data)
-        self.num_timesteps = self.times.size
         self.duration = self.num_timesteps * self.dt
