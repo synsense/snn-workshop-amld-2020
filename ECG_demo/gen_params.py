@@ -28,6 +28,7 @@ NUM_CPU_CORES = 12  # CPU cores that can be used for simulation with nest backen
 size_expand = 128  # Size of expansion layer
 size_rec_exc = 512  # Size of recurrent layer
 size_inh = 128  # Size of inhibitory layer
+size_reservoir = size_expand + size_rec_exc + size_inh
 
 # Reservoir neuron parameters
 # Time constants
@@ -52,49 +53,43 @@ baseweight_inh = 1e-4  # Weight for inhibitory connections
 thresh_exp_mean = 0.01  # Mean expansion layer neuron spiking threshold
 thresh_res_rec_mean = 0.01  # Mean excitatory recurrent neuron spiking threshold
 thresh_res_inh_mean = 0.01  # Mean reservoir inhibitory neuron spiking threshold
-refractory_exp = 0.001  # Expansion layer neuron refractory period
+refractory_exp_mean = 0.001  # Expansion layer neuron refractory period
 refractory_res_rec_mean = 0.002  # Mean excitatory recurrent neuron refractory period
 refractory_res_inh_mean = 0.002  # Mean reservoir inhibitory neuron refractory period
 
 
-kwargs_expand = dict(dt=DT, v_reset=0, v_rest=0, bias=0, refractory=refractory_exp)
-kwargs_reservoir = kwargs_expand.copy()
+kwargs_reservoir = dict(dt=DT, v_reset=0, v_rest=0, bias=0)
 
 # - Draw neuron and synapse parameters
 
 # Synaptic time constants
-kwargs_expand["tau_syn"] = draw_gaussian(
-    size_expand, tau_syn_exp_mean, MISMATCH, min=DT
-)
-
+tau_syn_expand = draw_gaussian(size_expand, tau_syn_exp_mean, MISMATCH, min=DT)
 tau_syn_rec = draw_gaussian(size_rec_exc, tau_syn_rec_mean, MISMATCH, min=DT)
 tau_syn_rec_inh = draw_gaussian(size_inh, tau_syn_rec_inh_mean, MISMATCH, min=DT)
-kwargs_reservoir["tau_syn_exc"] = np.r_[tau_syn_rec, tau_syn_rec_inh]
+kwargs_reservoir["tau_syn_exc"] = np.r_[tau_syn_expand, tau_syn_rec, tau_syn_rec_inh]
 kwargs_reservoir["tau_syn_inh"] = draw_gaussian(
-    size_rec_exc + size_inh, tau_syn_inh_mean, MISMATCH, min=DT
+    size_reservoir, tau_syn_inh_mean, MISMATCH, min=DT
 )
 
 # - Neuron time constants
-kwargs_expand["tau_mem"] = draw_gaussian(
-    size_expand, tau_mem_exp_mean, MISMATCH, min=DT
-)
-
+tau_mem_expand = draw_gaussian(size_expand, tau_mem_exp_mean, MISMATCH, min=DT)
 tau_mem_rec = draw_gaussian(size_rec_exc, tau_mem_rec_mean, MISMATCH, min=DT)
 tau_mem_inh = draw_gaussian(size_inh, tau_mem_inh_mean, MISMATCH, min=DT)
-kwargs_reservoir["tau_mem"] = np.r_[tau_mem_rec, tau_mem_inh]
+kwargs_reservoir["tau_mem"] = np.r_[tau_mem_expand, tau_mem_rec, tau_mem_inh]
 
 # Draw refractory periods and firing thresholds
+refractory_exp = draw_gaussian(size_expand, refractory_exp_mean, MISMATCH, min=DT)
 refractory_res_rec = draw_gaussian(
     size_rec_exc, refractory_res_rec_mean, MISMATCH, min=DT
 )
 refractory_res_inh = draw_gaussian(size_inh, refractory_res_inh_mean, MISMATCH, min=DT)
-kwargs_reservoir["refractory"] = np.r_[refractory_res_rec, refractory_res_inh]
+kwargs_reservoir["refractory"] = np.r_[
+    refractory_exp, refractory_res_rec, refractory_res_inh
+]
 
-kwargs_expand["v_thresh"] = draw_gaussian(size_expand, thresh_exp_mean, MISMATCH)
-
+thresh_exp = draw_gaussian(size_expand, thresh_exp_mean, MISMATCH)
 thresh_res_rec = draw_gaussian(size_rec_exc, thresh_res_rec_mean, MISMATCH)
 thresh_res_inh = draw_gaussian(size_inh, thresh_res_inh_mean, MISMATCH)
-kwargs_reservoir["v_thresh"] = np.r_[thresh_res_rec, thresh_res_inh]
+kwargs_reservoir["v_thresh"] = np.r_[thresh_exp, thresh_res_rec, thresh_res_inh]
 
-np.savez("kwargs_expand.npz", **kwargs_expand)
 np.savez("kwargs_reservoir.npz", **kwargs_reservoir)
