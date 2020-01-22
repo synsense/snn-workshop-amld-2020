@@ -11,16 +11,9 @@ import pandas as pd
 
 from rockpool.utilities import ArrayLike
 
-ecg_dir = Path(__file__).parent
-load_path = ecg_dir / "ecg_recordings" / "physiobank" / "mitdb"
-save_path = ecg_dir / "ecg_recordings"
-save_path_hpf = ecg_dir / "ecg_recordings" / "hpf"
-save_path_no_afib = ecg_dir / "ecg_recordings" / "no_afib"
-save_path_no_afib_hpf = ecg_dir / "ecg_recordings" / "no_afib" / "hpf"
+ecg_dir = Path(__file__).parent.parent / "ecg_data"
 
 DT = 1.0 / 360.0
-DEF_HP_FREQ = 0.1
-
 
 target_names = {
     0: "Normal beat",
@@ -92,7 +85,7 @@ class ECGRecordings:
                       unique values for selected categories
     """
 
-    default_load_path = save_path
+    default_load_path = ecg_dir
     target_names = target_names
     DT = DT
 

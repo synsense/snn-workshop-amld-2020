@@ -13,7 +13,6 @@ labels = [
     "Right bundle branch block beats",
     "Premature ventricular contractions",
     "Paced beats",
-    "Atrial premature beats",
 ]
 
 
@@ -31,5 +30,5 @@ def plot_examples():
         ax.set_xlabel("Time [s]")
         ax.set_ylabel("Amplitude [mV]")
         sns.despine()
-
+    axes[-1, -1].set_visible(False)
     return

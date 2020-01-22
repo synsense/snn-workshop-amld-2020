@@ -1,13 +1,13 @@
 import numpy as np
 from rockpool import TSContinuous
-from ECG import recordings
+from scripts import recordings
 
 DT = 0.002_778
 
 # - Input signal properties
 # These recordings are not taken at MLII and V1 leads:
 omit_recordings = [100, 102, 103, 104, 114, 117, 123, 124]
-use_targets = [0, 1, 2, 3, 4, 5]
+use_targets = [0, 1, 2, 3, 4]
 params_signal = {
     "include": {"target": use_targets},  # - Which target classes to use
     "exclude": {"is_used": True, "recording": omit_recordings},
@@ -15,7 +15,7 @@ params_signal = {
     "max_len_segment": 10,
     "continuous_segments": True,
     "min_anomal_per_seg": 3,
-    "target_probs": {1: 0.05, 2: 0.05, 3: 0.05, 4: 0.05, 5: 0.05, 0: 0.75},
+    "target_probs": {1: 0.07, 2: 0.07, 3: 0.07, 4: 0.05, 0: 0.72},
     "match_segments": set(),
 }
 
