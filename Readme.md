@@ -4,6 +4,8 @@
 
 This repository contains materials for the AMLD2020 workshop on using SNNs for low-power, real-time inference tasks.
 
+Thanks for joining us at the workshop! We would appreciate your feedback here: https://bit.ly/amld2020_snn
+
 ## Working with the notebooks
 
 1. Go to Google CoLab: https://colab.research.google.com/
