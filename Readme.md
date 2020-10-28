@@ -11,8 +11,8 @@ Thanks for joining us at the workshop! We would appreciate your feedback here: h
 1. Go to Google CoLab: https://colab.research.google.com/
 2. File | Open notebook…
 3. Choose the "GitHub" tab
-4. In the search field, enter "ai-cortex"
-5. Choose the repository "ai-cortex/snn-workshop-amld-2020"
+4. In the search field, enter "synsense"
+5. Choose the repository "synsense/snn-workshop-amld-2020"
 6. The list of notebooks should populate automatically
 7. Choose a notebook, and it will open a copy for you
 
