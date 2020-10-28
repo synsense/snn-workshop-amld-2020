@@ -22,9 +22,9 @@ Here's a link to the introductory notebook: https://colab.research.google.com/gi
 
 The notebooks should install the packages they need. But just in case, here is a short list
 
-* SINABS and dependencies: https://aictx.gitlab.io/sinabs/
+* SINABS and dependencies: https://synsense.gitlab.io/sinabs/
 
-* Rockpool and dependencies: https://aictx.gitlab.io/rockpool/
+* Rockpool and dependencies: https://synsense.gitlab.io/rockpool/
 
   * NEST; using `conda install -c conda-forge nest-simulator`  is easiest
 
@@ -32,12 +32,12 @@ The notebooks should install the packages they need. But just in case, here is a
 
 ## Credits
 
-Dylan Muir <dylan.muir@aictx.ai>
+Dylan Muir <dylan.muir@synsense.ai>
 
-Sadique Sheik <sadique.sheik@aictx.ai>
+Sadique Sheik <sadique.sheik@synsense.ai>
 
-Felix Bauer <felix.bauer@aictx.ai>
+Felix Bauer <felix.bauer@synsense.ai>
 
-Philipp Weidel <philipp.weidel@aictx.ai>
+Philipp Weidel <philipp.weidel@synsense.ai>
 
-Martino Sorbaro <martino.sorbaro@aictx.ai>
+Martino Sorbaro <martino.sorbaro@synsense.ai>
